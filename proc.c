@@ -110,7 +110,7 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
-  p->is_thread=0;
+  p->thread_flag=0;
   p->active_threads=0;
   p->thread_stack=0;
   return p;
@@ -551,7 +551,7 @@ clone(void (*worker)(void*,void*),void* arg1,void* arg2,void* stack)
   }
 
   // Copy process state from proc.
-  if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0 || curproc->is_thread == 1){
+  if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0 || curproc->thread_flag == 1){
     np->kstack = 0;
     np->state = UNUSED;
     return -1;
@@ -561,13 +561,13 @@ clone(void (*worker)(void*,void*),void* arg1,void* arg2,void* stack)
   curproc ->active_threads ++;
   np->pid = curproc->active_threads;
   *np->tf = *curproc->tf;
-  np->is_thread = 1;
+  np->thread_flag = 1;
   np->thread_stack = (char*)stack;
-  test_stack[0] = (uint) 0xfff000ff;
+  test_stack[0] = (uint) 0xf0000000;
   test_stack[1] = (uint) arg1;
   test_stack[2] = (uint) arg2;
 
-  sp = (uint)stack - 12;
+  sp = (uint)stack;
 
   if(copyout(np->pgdir, sp,test_stack, 3 * sizeof(uint)) == -1){
       kfree(np->kstack);
@@ -575,10 +575,9 @@ clone(void (*worker)(void*,void*),void* arg1,void* arg2,void* stack)
       np->state = UNUSED;
       curproc->active_threads--;
       np->pid=0;
-      np->is_thread=0;      
+      np->thread_flag=0;      
       return -1;
   }
-  np->tf->esp=sp;
   np->tf->eip=(uint)worker;
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -615,7 +614,7 @@ join(int thread_id)
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       // Check if the thread belongs to the current process and matches the provided thread_id
-      if(p->parent != curproc || p->pid != thread_id || p->is_thread != 1)
+      if(p->parent != curproc || p->pid != thread_id || p->thread_flag != 1)
         continue;
       
       havekids = 1;
