@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "types.h": "c",
+        "user.h": "c",
+        "memlayout.h": "c",
+        "param.h": "c",
+        "x86.h": "c",
+        "proc.h": "c",
+        "spinlock.h": "c",
+        "typeindex": "c",
+        "typeinfo": "c",
+        "syscall.h": "c",
+        "stat.h": "c"
+    }
+}

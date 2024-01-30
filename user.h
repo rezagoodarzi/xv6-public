@@ -1,5 +1,6 @@
 struct stat;
 struct rtcdate;
+struct spinlock;
 
 // system calls
 int fork(void);
@@ -24,6 +25,8 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 
+int clone(void (*)(void*,void*),void*,void*,void*);
+int join(int);
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
@@ -37,3 +40,12 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+
+int thread_create(void (*)(void*,void*),void*,void*);
+int thread_join(int thread_id);
+
+void lock_init(struct spinlock*);
+void lock_acquire(struct spinlock*);
+void lock_release(struct spinlock*);
+
+

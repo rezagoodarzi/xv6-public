@@ -40,7 +40,9 @@ struct proc {
   pde_t* pgdir;                // Page table
   char *kstack;                // Bottom of kernel stack for this process
   enum procstate state;        // Process state
-  int pid;                     // Process ID
+  int pid;                     // Process ID , if thread then is thread id
+  char* thread_stack;          // Thread stack
+  int active_threads;          // number of active threads
   struct proc *parent;         // Parent process
   struct trapframe *tf;        // Trap frame for current syscall
   struct context *context;     // swtch() here to run process
@@ -49,6 +51,7 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  int  is_thread;
 };
 
 // Process memory is laid out contiguously, low addresses first:

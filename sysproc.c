@@ -6,7 +6,6 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
-
 int
 sys_fork(void)
 {
@@ -88,4 +87,53 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+int sys_clone(void)
+{
+
+    void (*func)(void *,void *);
+    char *stack, *arg1,*arg2;
+
+    if(argptr(0, (char **)&func, 0) == -1) {
+        return -1;
+    }
+
+    if(argptr(1, &arg1, 0) == -1) {
+        return -1;
+    }
+
+    if(argptr(2, &arg2, 0) == -1) {
+        return -1;
+    }
+    if(argint(3, (int *)&stack) == -1) {
+        return -1;
+    }
+
+
+    if(myproc()->sz < (uint)arg1 + (uint)arg2) {
+        return -1;
+    }
+
+
+    if(myproc()->sz <= (uint)stack && 
+        myproc()->sz < (uint)stack - PGSIZE) {
+        return -1;
+    }
+
+
+  return clone(func,(void*)arg1,(void*)arg2,(void *)stack);
+
+}
+
+
+int
+sys_join(){
+  int tid;
+
+  if(argint(0,&tid) == -1){
+    return -1;
+  }
+
+  return join(tid);
 }
